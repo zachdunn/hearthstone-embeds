@@ -2,6 +2,13 @@
 	'use strict';
 	var hs = window.hearthstone || {},
 	cardLibrary = [],
+	options = {},
+	defaultOptions = {
+		hearthpwnLink: true,
+		golden: false,
+		animateGold: true,
+		flipped: false
+	},
 	BASE_CARD_URL = 'images/cards/',
 	HEARTHPWN_CARD_URL = 'http://www.hearthpwn.com/cards/',
 	RARITY_LIST = [
@@ -59,24 +66,24 @@
 			id: "CS2_023",
 			hearthpwnId: 489,
 			name: 'Arcane Intellect'
+		},
+		{
+			id: "BRM_015",
+			hearthpwnId: 14464,
+			name: 'Revenge'
 		}
 	],
-	highlightCards = function (options) {
-		var defaultOptions = {
-			hearthpwnLink: true,
-			useGolden: false
-		},
-		useGolden = function (card, goldConfig) {
+	highlightCards = function () {
+		var useGolden = function (card, golden) {
 			var goldMode = false;
-			if (_.isArray(goldConfig) && goldConfig.length > 0 
-				&& goldConfig.indexOf(card.rarity.toLowerCase()) !== -1) {
+			if (_.isArray(golden) && golden.length > 0 
+				&& golden.indexOf(card.rarity.toLowerCase()) !== -1) {
 					goldMode = true;
-			} else if (goldConfig === true) {
+			} else if (golden === true || golden === 'true') {
 				goldMode = true;
 			}
 			return goldMode;
 		};
-		options = _.merge(defaultOptions, options);
 		$('a[hearthstone-card]').each(function () {
 			var matchedCard = getCardByName($(this).text());
 			console.log(matchedCard);
@@ -91,7 +98,7 @@
 					href: HEARTHPWN_CARD_URL + matchedCard.hearthpwnId
 				});
 			}
-			$(this).data('hs-golden', useGolden(matchedCard, options.useGolden));
+			$(this).data('hs-golden', useGolden(matchedCard, options.golden));
 		});
 	},
 	getCardByID = function (cardId) {
@@ -121,11 +128,10 @@
 	},
 	updateTooltip = function (card, goldMode, cardFrame) {
 		var cardImage = false,
-				GOLD_VIDEO = true,
 				cardFrame = cardFrame || '#card-hover',
-				tooltip = $(cardFrame);
-		if (GOLD_VIDEO && goldMode) {
-			var cardPlayer = tooltip.find('.hs-card-video').get(0);
+				tooltip = $(cardFrame),
+				cardPlayer = tooltip.find('.hs-card-video').get(0);
+		if (goldMode && options.animateGold) {
 			cardPlayer.pause();
 			tooltip.find('.hs-card-webm').attr({
 				src: BASE_CARD_URL + 'legendary/' + card.hearthpwnId + '.webm'
@@ -161,14 +167,43 @@
 	};
 
 	/**
+	 * @name hearthstone.getCardbackByKey
+	 * @description Get the URL for a cardback image by key
+	 * @param {String} key Cardback name as key
+	 * @return {String} URL of cardback image
+	 */
+	hs.getCardbackByKey = function (key) {
+		var selected = cardbacks[key] || cardbacks[DEFAULT_CARDBACK],
+				cardbackLink = BASE_CARD_URL + 'cardbacks/' + selected;
+		return cardbackLink;
+	};
+
+	/**
+	 * @name hearthstone.buildHand
+	 * @description Build a hand of cards from an array
+	 * @param {Array} cards Names of cards to create
+	 */
+	hs.buildHand = function (cards) {
+		var hand = [];
+		if (_.isArray(cards) && cards.length > 0) {
+			cards.forEach(function (card) {
+				hand.push(getCardByName(card));
+			});
+		}
+		return hand;
+	};
+
+	/**
 	 * @name hearthstone.prepEmbed
 	 * @description Used with embed. Updates card shown based on URL params
 	 */
 	hs.prepEmbed = function () {
 		var matchedCard,
-				options = URLToArray(location.search),
-				golden = (options.golden === "true" || options.golden === true),
+				cardback,
+				golden,
 				cardFrame = $('#card-frame');
+		options = _.merge(defaultOptions, URLToArray(location.search));
+		golden = (options.golden === "true" || options.golden === true);
 		// Load the master card library JSON
 		this.loadCards().then(function () {
 			if (options.card) {
@@ -181,7 +216,7 @@
 				updateTooltip(matchedCard, golden, '#card-frame');
 			}
 			if (options.cardback) {
-				var cardback = cardbacks[options.cardback.toUpperCase()];
+				cardback = cardbacks[options.cardback.toUpperCase()];
 				$('.card-back-image').attr({
 					src: BASE_CARD_URL + 'cardbacks/' + cardback
 				});				
@@ -198,13 +233,14 @@
 	/**
 	 * @name hearthstone.init
 	 * @description Scans page for hearthstone cards and updates their links
+	 * @param {Object} userOptions User specific options
 	 */
-	hs.init = function () {
+	hs.init = function (userOptions) {
+		options = _.merge(defaultOptions, userOptions);
 		// Load the master card library JSON
-		this.loadCards().then(function () {
-			highlightCards({
-				useGolden: ['legendary']
-			});
+		return this.loadCards().then(function () {
+			highlightCards();
+			// Show card on hover
 			$('a[hearthstone-card]').on('mouseover', function (e) {
 				var matchedCard = getCardByName($(this).text());
 				if (matchedCard) {
@@ -214,7 +250,7 @@
 			}).on('mouseout', function (e) {
 				$('#card-hover').hide();
 			});
-
+			// Keep card at mouse posiiton
 			$('body').on('mousemove', function (e) {
 				var HOVER_OFFSET = 25;
 				$('#card-hover').css({

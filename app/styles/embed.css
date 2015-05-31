@@ -2,27 +2,34 @@ body{
 	margin:0;
 	background:transparent;
 }
-#card-frame video{
+#card-frame video,
+.card-frame video{
 	display:none;
 }
-#card-frame{
+#card-frame,
+.card-frame{
 	perspective:1000;
 }
-/*#card-frame:hover .card-flip, */
+.card-frame.flip .card-flip,
 #card-frame.flip .card-flip{
 	transform: rotateY(180deg);
 }
 
-#card-frame.flip{
+#card-frame.flip,
+.card-frame.flip{
 	transition: 0.6s;
 	/*transform:rotate(10deg);*/
 }
 
+.card-frame.flip:hover,
 #card-frame.flip:hover{
 	/*transform: translate(0, -50px) rotate(0deg) scale(2.0);*/
 }
 
-#card-frame, .front, .back{
+#card-frame,
+.card-frame,
+.front,
+.back{
 	width:286px;
 	height:395px;
 }

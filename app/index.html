@@ -14,6 +14,7 @@
     <!-- endbuild -->
     <!-- build:css(.tmp) styles/main.css -->
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/card.css">
     <!-- endbuild -->
   </head>
   <body>
@@ -41,13 +42,19 @@
           <li><a href="#" hearthstone-card>Trade Prince Gallywix</a></li>
         </ul>
       </div>
+
+      <div id="hand">
+        
+      </div>
+
       <script id="hs-embed-code" type='text/javascript'>     
         (function () {
           var hs = document.createElement('iframe'),   
               s = document.getElementById('hs-embed-code');
           hs.setAttribute('id', 'hs-embed-card');
           hs.style.backgroundColor = "transparent";
-          hs.frameBorder = "0";hs.allowTransparency="true";s.parentNode.insertBefore(hs, s);
+          hs.frameBorder = "0";hs.allowTransparency="true";
+          s.parentNode.insertBefore(hs, s);
           hs.src = '/card.html?card=NEW1_030&golden=true&cardback=golden';
           hs.width = '300';
           hs.height = '400';
@@ -75,6 +82,7 @@
     <!-- bower:js -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/lodash/lodash.js"></script>
+    <script src="bower_components/handlebars/handlebars.js"></script>
     <!-- endbower -->
     <!-- endbuild -->
 
@@ -95,7 +103,48 @@
 
     <!-- build:js({app,.tmp}) scripts/main.js -->
     <script src="scripts/main.js"></script>
-    <script>hearthstone.init()</script>
+    <script>
+    var options = {
+      golden: ['legendary']
+    };
+    hearthstone.init(options).then(function () {
+      var hand = hearthstone.buildHand([
+        'Shieldmaiden',
+        'Trade Prince Gallywix',
+        'Revenge',
+        'Sylvanas Windrunner'
+      ]),
+      cardbackLink = hearthstone.getCardbackByKey('LEGEND');
+      hand.forEach(function (card) {
+        var source   = $("#card-template").html(),
+            template = Handlebars.compile(source),
+            context = {card: card, cardback: cardbackLink},
+            html = template(context);
+        $('#hand').append(html);
+        $('.card-frame').addClass('flip');
+      });
+      // Allow card flips
+      $('body').on('touchstart click', '.card-frame', function () {
+        $(this).toggleClass('flip');
+      });
+    });
+    </script>
+    <script id="card-template" type="text/x-handlebars-template">
+      <div class="card-frame">
+        <div class="card-flip">
+          <div class="front">
+            <img class="card-back-image" src="{{cardback}}" width="241px">
+          </div>
+          <div class="back">
+            <img class="card-image" src="images/cards/{{card.hearthpwnId}}.png">
+            <video class="hs-card-video" autoplay loop width="286" height="395">
+              <source class="hs-card-webm" src="images/cards/legendary/474.webm" type="video/webm">
+              <img class="card-video-fallback" src="images/loading-card.png">
+            </video>
+          </div>
+        </div>
+      </div>
+    </script>
     <!-- endbuild -->
 </body>
 </html>

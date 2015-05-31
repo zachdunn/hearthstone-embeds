@@ -91,6 +91,7 @@ body {
 #card-hover{
   position:absolute;
   display:none;
+  z-index:9999;
 }
 
 .free-rarity, .free-rarity:hover{
