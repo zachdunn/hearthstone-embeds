@@ -1,0 +1,50 @@
+body{
+	margin:0;
+	background:transparent;
+}
+#card-frame video{
+	display:none;
+}
+#card-frame{
+	perspective:1000;
+}
+/*#card-frame:hover .card-flip, */
+#card-frame.flip .card-flip{
+	transform: rotateY(180deg);
+}
+
+#card-frame, .front, .back{
+	width:286px;
+	height:395px;
+}
+
+.card-flip{
+	transition: 0.6s;
+	transform-style: preserve-3d;
+	position: relative;
+}
+
+/* hide back of pane during swap */
+.front, .back {
+	backface-visibility: hidden;
+	position: absolute;
+	top: 0;
+	left: 0;
+	text-align:center;
+	cursor: pointer;
+}
+
+/* front pane, placed above back */
+.front {
+	z-index: 2;
+	/* for firefox 31 */
+	transform: rotateY(0deg);
+}
+
+/* back, initially hidden pane */
+.back {
+	transform: rotateY(180deg);
+}
+.card-back-image{
+	margin-top:25px;
+}
