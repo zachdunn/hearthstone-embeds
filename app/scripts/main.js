@@ -31,6 +31,16 @@
 			name: 'Deathwing'
 		},
 		{
+			id: 'EX1_016',
+			hearthpwnId: 33,
+			name: 'Sylvanas Windrunner'
+		},
+		{
+			id: 'GVG_028',
+			hearthpwnId: 12291,
+			name: 'Trade Prince Gallywix'
+		},
+		{
 			id: "GVG_041",
 			hearthpwnId: 12298,
 			name: 'Dark Wispers'
@@ -200,8 +210,6 @@
 				if (matchedCard) {
 					updateTooltip(matchedCard, $(this).data('hs-golden'));
 					$('#card-hover').show();
-				} else {
-					// No match found
 				}
 			}).on('mouseout', function (e) {
 				$('#card-hover').hide();
